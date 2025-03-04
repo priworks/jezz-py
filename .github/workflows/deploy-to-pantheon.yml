@@ -55,6 +55,8 @@ jobs:
           PANTHEON_GIT_URL=$(terminus connection:info ${{ secrets.PANTHEON_SITE_NAME }}.${{ env.PANTHEON_ENV }} --field=git_url)
           git remote add pantheon $PANTHEON_GIT_URL
 
+          echo $(git remote -v)
+
       - name: Get user email from GitHub API
         run: |
           # Set the committer and author to the current GitHub user
