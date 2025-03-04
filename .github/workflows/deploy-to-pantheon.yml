@@ -24,7 +24,7 @@ jobs:
 
       - name: Authenticate with Terminus
         run: |
-          terminus auth:login --token ${{ secrets.PANTHEON_MACHINE_TOKEN }}
+          terminus auth:login --machine-token=${{ secrets.PANTHEON_MACHINE_TOKEN }}
 
       - name: Define the environment in which you'll push
         run: |
