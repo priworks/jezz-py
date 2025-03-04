@@ -26,12 +26,6 @@ jobs:
         run: |
           terminus auth:login --machine-token=${{ secrets.PANTHEON_MACHINE_TOKEN }}
 
-      - name: Setup the SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keygen -t rsa -b 4096 -C "github-actions@pantheon" -f ~/.ssh/id_rsa -N ""
-          terminus ssh-key:add ~/.ssh/id_rsa.pub --yes
-
       - name: Define the environment in which you'll push
         run: |
           # Dynamically use the current branch for deployment
@@ -48,14 +42,28 @@ jobs:
 
       - name: Add Pantheon Git Remote
         run: |
-          # Replace 'your-site-name' with your actual Pantheon site name and 'your-env' with your environment (dev/test/live)
+          # Establish the environment as git
           terminus connection:set ${{ secrets.PANTHEON_SITE_NAME }}.${{ env.PANTHEON_ENV }} git
 
           # Get Pantheon Git URL and set it as a remote
-          PANTHEON_GIT_URL=$(terminus connection:info ${{ secrets.PANTHEON_SITE_NAME }}.${{ env.PANTHEON_ENV }} --field=git_url)
+          export PANTHEON_GIT_URL=$(terminus connection:info ${{ secrets.PANTHEON_SITE_NAME }}.${{ env.PANTHEON_ENV }} --field=git_url)
           git remote add pantheon $PANTHEON_GIT_URL
 
-          echo $(git remote -v)
+          echo "PANTHEON_GIT_URL=$PANTHEON_GIT_URL" >> $GITHUB_ENV
+
+          # Check the remotes
+          git remote -v
+
+      - name: Setup the SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -t rsa -m PEM -C "github-actions@pantheon" -f ~/.ssh/id_rsa -N ""
+          cat ~/.ssh/id_rsa.pub
+          # eval `ssh-agent`
+          # ssh-add ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ env.PANTHEON_GIT_URL }} >> ~/.ssh/known_hosts
+          terminus ssh-key:add ~/.ssh/id_rsa.pub --yes
 
       - name: Get user email from GitHub API
         run: |
@@ -87,5 +95,6 @@ jobs:
 
       - name: Remove the last SSH Key we Added to Pantheon
         run: |
-          LAST_SSH_KEY_ID=$(terminus ssh-key:list | tail -n 2 | head -n 1 | awk '{print $1}')
+          # grab the ID and use it to remove the key
+          LAST_SSH_KEY_ID=$(terminus ssh-key:list | grep "github-actions@pantheon" | awk '{print $1}')
           terminus ssh-key:remove "$LAST_SSH_KEY_ID"
