@@ -1,0 +1,75 @@
+name: JEZZ to Pantheon
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: mbstring, curl, xml, zip, mysql
+
+      - name: Install Terminus
+        run: |
+          curl -sSL https://github.com/pantheon-systems/terminus/releases/download/3.0.0/terminus.phar -o /usr/local/bin/terminus
+          chmod +x /usr/local/bin/terminus
+
+      - name: Authenticate with Terminus
+        run: |
+          terminus auth:login --token ${{ secrets.PANTHEON_MACHINE_TOKEN }}
+
+      - name: Define the environment in which you'll push
+        run: |
+          # Dynamically use the current branch for deployment
+          CURRENT_BRANCH="${GITHUB_REF##*/}"
+
+          if [ "$CURRENT_BRANCH" == "master" ]; then
+            PANTHEON_ENV="dev"
+          else
+            PANTHEON_ENV="$CURRENT_BRANCH"
+          fi
+
+      - name: Add Pantheon Git Remote
+        run: |
+          # Replace 'your-site-name' with your actual Pantheon site name and 'your-env' with your environment (dev/test/live)
+          terminus connection:set ${{ secrets.PANTHEON_SITE_NAME }}.$PANTHEON_ENV git
+
+          # Get Pantheon Git URL and set it as a remote
+          PANTHEON_GIT_URL=$(terminus connection:info ${{ secrets.PANTHEON_SITE_NAME }}.$PANTHEON_ENV --field=git_url)
+          git remote add pantheon $PANTHEON_GIT_URL
+
+      - name: Get user email from GitHub API
+        run: |
+          # Set the committer and author to the current GitHub user
+          git config --global user.name "${{ github.actor }}"
+
+          # Get the email of the user who triggered the workflow using GitHub API
+          USER_EMAIL=$(curl -s \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/users/${{ github.actor }} | jq -r .email)
+
+          # Use the retrieved email or fallback to the default private email if not available
+          if [ -z "$USER_EMAIL" ]; then
+            git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          else
+            git config --global user.email "$USER_EMAIL"
+          fi
+
+      - name: Push code to Pantheon
+        run: |
+          # Fetch branches from Pantheon
+          git fetch pantheon
+
+          git checkout $CURRENT_BRANCH || git checkout -b $CURRENT_BRANCH
+
+          git add -A
+          git commit -m "${{ github.event.head_commit.message }}"
+          git push -u pantheon $CURRENT_BRANCH
