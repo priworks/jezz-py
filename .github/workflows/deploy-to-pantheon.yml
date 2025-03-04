@@ -37,6 +37,8 @@ jobs:
             PANTHEON_ENV="$CURRENT_BRANCH"
           fi
 
+          echo "$PANTHEON_ENV"
+
       - name: Add Pantheon Git Remote
         run: |
           # Replace 'your-site-name' with your actual Pantheon site name and 'your-env' with your environment (dev/test/live)
