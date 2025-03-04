@@ -26,6 +26,12 @@ jobs:
         run: |
           terminus auth:login --machine-token=${{ secrets.PANTHEON_MACHINE_TOKEN }}
 
+      - name: Setup the SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -t rsa -b 4096 -C "github-actions@pantheon" -f ~/.ssh/id_rsa -N ""
+          terminus ssh-key:add ~/.ssh/id_rsa.pub --yes
+
       - name: Define the environment in which you'll push
         run: |
           # Dynamically use the current branch for deployment
@@ -76,3 +82,8 @@ jobs:
           git add -A
           git commit -m "${{ github.event.head_commit.message }}"
           git push -u pantheon ${{ env.CURRENT_BRANCH }}
+
+      - name: Remove the last SSH Key we Added to Pantheon
+        run: |
+          LAST_SSH_KEY_ID=$(terminus ssh-key:list | tail -n 2 | head -n 1 | awk '{print $1}')
+          terminus ssh-key:remove "$LAST_SSH_KEY_ID"
