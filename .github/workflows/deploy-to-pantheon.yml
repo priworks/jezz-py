@@ -29,23 +29,24 @@ jobs:
       - name: Define the environment in which you'll push
         run: |
           # Dynamically use the current branch for deployment
-          CURRENT_BRANCH="${GITHUB_REF##*/}"
+          export CURRENT_BRANCH="${GITHUB_REF##*/}"
 
           if [ "$CURRENT_BRANCH" == "master" ]; then
-            PANTHEON_ENV="dev"
+            export PANTHEON_ENV="dev"
           else
-            PANTHEON_ENV="$CURRENT_BRANCH"
+            export PANTHEON_ENV="$CURRENT_BRANCH"
           fi
 
-          echo "$PANTHEON_ENV"
+          echo "PANTHEON_ENV=$PANTHEON_ENV" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$CURRENT_BRANCH" >> $GITHUB_ENV
 
       - name: Add Pantheon Git Remote
         run: |
           # Replace 'your-site-name' with your actual Pantheon site name and 'your-env' with your environment (dev/test/live)
-          terminus connection:set ${{ secrets.PANTHEON_SITE_NAME }}.$PANTHEON_ENV git
+          terminus connection:set ${{ secrets.PANTHEON_SITE_NAME }}.${{ env.PANTHEON_ENV }} git
 
           # Get Pantheon Git URL and set it as a remote
-          PANTHEON_GIT_URL=$(terminus connection:info ${{ secrets.PANTHEON_SITE_NAME }}.$PANTHEON_ENV --field=git_url)
+          PANTHEON_GIT_URL=$(terminus connection:info ${{ secrets.PANTHEON_SITE_NAME }}.${{ env.PANTHEON_ENV }} --field=git_url)
           git remote add pantheon $PANTHEON_GIT_URL
 
       - name: Get user email from GitHub API
@@ -70,8 +71,8 @@ jobs:
           # Fetch branches from Pantheon
           git fetch pantheon
 
-          git checkout $CURRENT_BRANCH || git checkout -b $CURRENT_BRANCH
+          git checkout ${{ env.CURRENT_BRANCH }} || git checkout -b ${{ env.CURRENT_BRANCH }}
 
           git add -A
           git commit -m "${{ github.event.head_commit.message }}"
-          git push -u pantheon $CURRENT_BRANCH
+          git push -u pantheon ${{ env.CURRENT_BRANCH }}
