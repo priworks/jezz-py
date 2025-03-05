@@ -110,10 +110,8 @@ jobs:
           # grab the ID and use it to remove the key
           LAST_SSH_KEY_ID=$(terminus ssh-key:list | grep "github-actions@pantheon" | awk '{print $1}')
 
-          if [ -n "$LAST_SSH_KEY_ID" || "." !=  "$LAST_SSH_KEY_ID" ]; then
+          if [ -n "$LAST_SSH_KEY_ID" || '.' !=  "$LAST_SSH_KEY_ID" ]; then
             for KEY in $LAST_SSH_KEY_ID; do
-              terminus ssh-key:remove $LAST_SSH_KEY_ID
+              terminus ssh-key:remove "$KEY"
             done
           fi
-
-          exit 0
