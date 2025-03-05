@@ -112,7 +112,7 @@ jobs:
           git add -A
           git status
           git commit -m "${{ github.event.head_commit.message }}" || echo "No changes to commit."
-          git push -u pantheon ${{ env.CURRENT_BRANCH }} || echo "Everything is up-to-date. Skipping push."
+          git push pantheon ${{ env.CURRENT_BRANCH }} || echo "Everything is up-to-date. Skipping push."
 
           exit 0  # Ensure GitHub Actions doesn't treat this as a failure
 
