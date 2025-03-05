@@ -103,7 +103,7 @@ jobs:
           git diff
           git diff --staged
 
-          git push
+          git push pantheon ${{ env.CURRENT_BRANCH }}
 
           # Check if there are changes before adding and committing
           # if git diff --quiet && git diff --staged --quiet; then
@@ -114,7 +114,7 @@ jobs:
           git add -A
           git status
           git commit -m "${{ github.event.head_commit.message }}"
-          git push
+          git push -f pantheon ${{ env.CURRENT_BRANCH }}
 
           exit 0  # Ensure GitHub Actions doesn't treat this as a failure
 
