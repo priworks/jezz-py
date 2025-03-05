@@ -60,9 +60,14 @@ jobs:
           ssh-keygen -t rsa -m PEM -C "github-actions@pantheon" -f ~/.ssh/id_rsa -N ""
           terminus ssh-key:add ~/.ssh/id_rsa.pub --yes
 
-          PANTHEON_SSH_KEY_DOMAIN=$(echo "${{ env.PANTHEON_GIT_URL }}" | awk -F'[@/]' '{print $2}')
+          PANTHEON_SSH_KEY_DOMAIN=$(echo "${{ env.PANTHEON_GIT_URL }}" | awk -F'[@/]' '{print $4}')
 
-          ssh-keyscan -H "$PANTHEON_SSH_KEY_DOMAIN" >> ~/.ssh/known_hosts
+          cat <<EOF >> ~/.ssh/config
+          Host *.drush.in
+            StrictHostKeyChecking no
+          EOF
+
+          # ssh-keyscan -H "$PANTHEON_SSH_KEY_DOMAIN" >> ~/.ssh/known_hosts
 
       - name: Get user email from GitHub API
         run: |
