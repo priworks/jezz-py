@@ -126,9 +126,11 @@ jobs:
         run: |
 
           # grab the ID and use it to remove the key
+          export COLUMNS=256
+
           terminus ssh-key:list
 
-          LAST_SSH_KEY_ID=$(terminus ssh-key:list | grep "github-actions@pantheon" | awk '{print $1}')
+          LAST_SSH_KEY_ID=$(terminus ssh-key:list | grep "github-actions@pantheon" | awk '{ print $1 }')
 
           echo $LAST_SSH_KEY_ID
 
