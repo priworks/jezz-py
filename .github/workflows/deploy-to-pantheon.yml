@@ -105,7 +105,7 @@ jobs:
           # git diff
           # git diff --staged
 
-          git push pantheon ${{ env.CURRENT_BRANCH }} --quiet
+          git push pantheon ${{ env.CURRENT_BRANCH }}
 
           exit 0  # Ensure GitHub Actions doesn't treat this as a failure
 
@@ -131,6 +131,8 @@ jobs:
             echo "$LAST_SSH_KEY_ID" | while IFS= read -r KEY; do
               if [ -n "$KEY" ]; then
                 terminus ssh-key:remove "$KEY"
+                echo "$KEY"
+                echo " "
               fi
             done
           fi
