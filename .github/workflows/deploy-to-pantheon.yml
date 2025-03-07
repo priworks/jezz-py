@@ -130,7 +130,7 @@ jobs:
 
           LAST_SSH_KEY_ID=$(terminus ssh-key:list | grep "github-actions@pantheon" | awk '{print $1}')
 
-          print "$LAST_SSH_KEY_ID"
+          echo $LAST_SSH_KEY_ID
 
           if [ -n "$LAST_SSH_KEY_ID" ] && [ '.' !=  "$LAST_SSH_KEY_ID" ]; then
             echo "$LAST_SSH_KEY_ID" | while IFS= read -r KEY; do
