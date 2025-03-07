@@ -124,15 +124,16 @@ jobs:
 
       - name: Remove the last SSH Key we Added to Pantheon
         run: |
+
           # grab the ID and use it to remove the key
+          terminus ssh-key:list
+
           LAST_SSH_KEY_ID=$(terminus ssh-key:list | grep "github-actions@pantheon" | awk '{print $1}')
 
           if [ -n "$LAST_SSH_KEY_ID" ] && [ '.' !=  "$LAST_SSH_KEY_ID" ]; then
             echo "$LAST_SSH_KEY_ID" | while IFS= read -r KEY; do
               if [ -n "$KEY" ]; then
                 terminus ssh-key:remove "$KEY"
-                echo "$KEY"
-                echo " "
               fi
             done
           fi
