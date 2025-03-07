@@ -98,21 +98,23 @@ jobs:
 
           git branch --set-upstream-to=pantheon/${{ env.CURRENT_BRANCH }}
 
+          git pull pantheon ${{ env.CURRENT_BRANCH }} --no-rebase
+
           # Debug: Check the status before adding files
           git status
           git diff
           git diff --staged
 
           # Check if there are changes before adding and committing
-          if git diff --quiet && git diff --staged --quiet; then
-            echo "No changes to commit. Skipping push."
-            exit 0  # Exit gracefully without failing the job
-          fi
+          # if git diff --quiet && git diff --staged --quiet; then
+          #   echo "No changes to commit. Skipping push."
+          #   exit 0  # Exit gracefully without failing the job
+          # fi
 
-          # git add -A
-          # git status
-          # git commit -m "${{ github.event.head_commit.message }}" || echo "No changes to commit."
-          # git push -u pantheon ${{ env.CURRENT_BRANCH }} || echo "Everything is up-to-date. Skipping push."
+          git add -A
+          git status
+          git commit -m "${{ github.event.head_commit.message }}" || echo "No changes to commit."
+          git push -f pantheon ${{ env.CURRENT_BRANCH }} || echo "Everything is up-to-date. Skipping push."
 
           exit 0  # Ensure GitHub Actions doesn't treat this as a failure
 

@@ -98,6 +98,8 @@ jobs:
 
           git branch --set-upstream-to=pantheon/${{ env.CURRENT_BRANCH }}
 
+          git pull pantheon ${{ env.CURRENT_BRANCH }} --no-rebase
+
           # Debug: Check the status before adding files
           git status
           git diff
