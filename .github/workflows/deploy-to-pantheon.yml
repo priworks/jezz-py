@@ -116,7 +116,7 @@ jobs:
           git add -A
           git status
           git commit -m "${{ github.event.head_commit.message }}"
-          git push -f pantheon ${{ env.CURRENT_BRANCH }}
+          git push -f pantheon ${{ env.CURRENT_BRANCH }} --quiet
 
           exit 0  # Ensure GitHub Actions doesn't treat this as a failure
 
