@@ -95,9 +95,7 @@ jobs:
           git checkout ${{ env.CURRENT_BRANCH }} || git checkout -b ${{ env.CURRENT_BRANCH }}
 
           git fetch --all
-
           git branch --set-upstream-to=pantheon/${{ env.CURRENT_BRANCH }}
-
           git pull pantheon ${{ env.CURRENT_BRANCH }} --no-rebase
 
           # Debug: Check the status before adding files
@@ -105,34 +103,20 @@ jobs:
           # git diff
           # git diff --staged
 
+          git add -A
+          git commit -m "[${{ github.actor }}] | ${{ github.event.head_commit.message }}"
           git push pantheon ${{ env.CURRENT_BRANCH }}
-
-          exit 0  # Ensure GitHub Actions doesn't treat this as a failure
-
-          # Check if there are changes before adding and committing
-          # if git diff --quiet && git diff --staged --quiet; then
-          #   echo "No changes to commit. Skipping push."
-          #   exit 0  # Exit gracefully without failing the job
-          # fi
-
-          # git add -A
-          # git status
-          # git commit -m "${{ github.event.head_commit.message }}"
-          # git push -f pantheon ${{ env.CURRENT_BRANCH }} --quiet
 
           exit 0  # Ensure GitHub Actions doesn't treat this as a failure
 
       - name: Remove the last SSH Key we Added to Pantheon
         run: |
-
           # grab the ID and use it to remove the key
-          export COLUMNS=256
+          export COLUMNS=256 # So the table displayed by terminus won't split into useless lines
 
           terminus ssh-key:list
 
           LAST_SSH_KEY_ID=$(terminus ssh-key:list | grep "github-actions@pantheon" | awk '{ print $1 }')
-
-          echo $LAST_SSH_KEY_ID
 
           if [ -n "$LAST_SSH_KEY_ID" ] && [ '.' !=  "$LAST_SSH_KEY_ID" ]; then
             echo "$LAST_SSH_KEY_ID" | while IFS= read -r KEY; do
