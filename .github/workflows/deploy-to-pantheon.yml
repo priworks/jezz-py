@@ -101,11 +101,11 @@ jobs:
           git pull pantheon ${{ env.CURRENT_BRANCH }} --no-rebase
 
           # Debug: Check the status before adding files
-          git status
-          git diff
-          git diff --staged
+          # git status
+          # git diff
+          # git diff --staged
 
-          git push pantheon ${{ env.CURRENT_BRANCH }}
+          git push pantheon ${{ env.CURRENT_BRANCH }} --quiet
 
           # Check if there are changes before adding and committing
           # if git diff --quiet && git diff --staged --quiet; then
@@ -113,10 +113,10 @@ jobs:
           #   exit 0  # Exit gracefully without failing the job
           # fi
 
-          git add -A
-          git status
-          git commit -m "${{ github.event.head_commit.message }}"
-          git push -f pantheon ${{ env.CURRENT_BRANCH }} --quiet
+          # git add -A
+          # git status
+          # git commit -m "${{ github.event.head_commit.message }}"
+          # git push -f pantheon ${{ env.CURRENT_BRANCH }} --quiet
 
           exit 0  # Ensure GitHub Actions doesn't treat this as a failure
 
