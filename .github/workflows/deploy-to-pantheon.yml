@@ -104,7 +104,7 @@ jobs:
           # git diff --staged
 
           # git add -A
-          git commit -m "[${{ github.actor }}] | ${{ github.event.head_commit.message }}"
+          git commit -m "[${{ github.actor }}] | ${{ github.event.head_commit.message }}" --quiet
           git push pantheon ${{ env.CURRENT_BRANCH }}
 
           exit 0  # Ensure GitHub Actions doesn't treat this as a failure
