@@ -107,6 +107,8 @@ jobs:
 
           git push pantheon ${{ env.CURRENT_BRANCH }} --quiet
 
+          exit 0  # Ensure GitHub Actions doesn't treat this as a failure
+
           # Check if there are changes before adding and committing
           # if git diff --quiet && git diff --staged --quiet; then
           #   echo "No changes to commit. Skipping push."
